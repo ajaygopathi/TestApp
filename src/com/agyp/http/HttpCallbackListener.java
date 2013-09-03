@@ -2,7 +2,7 @@ package com.agyp.http;
 
 /**
  * @author ajay
- *
+ * 
  */
 public interface HttpCallbackListener {
 
@@ -24,10 +24,5 @@ public interface HttpCallbackListener {
 	 * 
 	 */
 	public abstract void onError();
-
-	/**
-	 * Called to refresh the client page
-	 */
-	public abstract void refreshPage();
 
 }

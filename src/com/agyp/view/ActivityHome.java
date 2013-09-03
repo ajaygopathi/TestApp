@@ -1,6 +1,5 @@
 package com.agyp.view;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,7 +8,7 @@ import android.widget.Button;
 import com.agyp.testapp.Authentication;
 import com.agyp.testapp.LoginDialog.AuthDialogListener;
 
-public class ActivityHome extends Activity implements
+public class ActivityHome extends BaseHttpActivity implements
 		android.view.View.OnClickListener {
 
 	Authentication mAuthentication;
@@ -31,22 +30,7 @@ public class ActivityHome extends Activity implements
 
 	}
 
-	// public class AuthListener implements AuthAuthenticationListener {
-	//
-	// @Override
-	// public void onSuccess() {
-	// Toast.makeText(ActivityHome.this,
-	// "Instagram Authorization Successful", Toast.LENGTH_SHORT)
-	// .show();
-	// }
-	//
-	// @Override
-	// public void onFail(String error) {
-	// Toast.makeText(ActivityHome.this, "Authorization Failed",
-	// Toast.LENGTH_SHORT).show();
-	// }
-	//
-	// }
+	
 
 	private static final String TAG = ActivityHome.class.getSimpleName();
 
@@ -62,6 +46,24 @@ public class ActivityHome extends Activity implements
 			Log.v(TAG, "error: " + error);
 		}
 
+	}
+
+	@Override
+	public void onRequestComplete() {
+
+	}
+
+	@Override
+	public void onCancel() {
+
+	}
+
+	@Override
+	public void onError() {
+	}
+
+	private void makerequest(String token){
+		
 	}
 
 }
