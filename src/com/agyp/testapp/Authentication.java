@@ -34,8 +34,9 @@ public class Authentication {
 	private String mAuthUrl;
 	private String mTokenUrl;
 
-	public Authentication(Context context) {
+	public Authentication(Context context, AuthAuthenticationListener authAuthenticationListener) {
 		mContext = context;
+		this.mAuthAuthenticationListener = authAuthenticationListener;
 		// mSessionStore = new SessionStore(context);
 
 		mAuthUrl = HttpRequestConstants.AUTHURL
@@ -50,6 +51,8 @@ public class Authentication {
 				+ TestAppConstants.CLIENT_SECRET + "&redirect_uri="
 				+ TestAppConstants.CALLBACKURL
 				+ "&grant_type=authorization_code";
+		
+		Log.v(TAG, "auth url: "+ mAuthUrl);
 
 		ClientAuthDialogListener instaAuthDialogListener = new ClientAuthDialogListener();
 
@@ -65,10 +68,6 @@ public class Authentication {
 
 	}
 
-	public void setAuthAuthenticationListener(
-			AuthAuthenticationListener authAuthenticationListener) {
-		this.mAuthAuthenticationListener = authAuthenticationListener;
-	}
 
 	public interface AuthAuthenticationListener {
 		public abstract void onSuccess();
@@ -92,7 +91,7 @@ public class Authentication {
 
 	private void getAccessToken(String token) {
 		this.mToken = token;
-		Log.v(TAG, "accesstoken : " + token);
+		Log.v(TAG, "ajay accesstoken : " + token);
 		// new GetInstagramTokenAsyncTask().execute();
 	}
 
