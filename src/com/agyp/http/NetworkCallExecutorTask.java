@@ -28,8 +28,11 @@ public class NetworkCallExecutorTask extends AsyncTask<Void, Void, Void> {
 	private String mToken;
 	private ProgressDialog mProgressDialog;
 	private String mTokenUrl;
+	private HttpCallbackListener mlistener;
 
-	public NetworkCallExecutorTask(Bundle requestBundle, Context context) {
+	public NetworkCallExecutorTask(Bundle requestBundle, Context context,
+			HttpCallbackListener listener) {
+		mlistener = listener;
 		mToken = requestBundle.getString("token");
 		mTokenUrl = HttpRequestConstants.TOKENURL + "?client_id="
 				+ TestAppConstants.CLIENT_ID + "&client_secret="
@@ -44,6 +47,12 @@ public class NetworkCallExecutorTask extends AsyncTask<Void, Void, Void> {
 	@Override
 	protected Void doInBackground(Void... params) {
 		try {
+			
+			//prepare request object
+			//hit server
+			//parse
+			//callback
+
 			URL url = new URL(mTokenUrl);
 			HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url
 					.openConnection();
@@ -98,13 +107,17 @@ public class NetworkCallExecutorTask extends AsyncTask<Void, Void, Void> {
 		dismissDialog();
 		// mAuthAuthenticationListener.onSuccess();
 		super.onPostExecute(result);
-		
+
 	}
 
 	@Override
 	protected void onPreExecute() {
 		showDialog("Autherizing...");
 		super.onPreExecute();
+	}
+
+	public void unregisterCallbackListener() {
+		mlistener = null;
 	}
 
 	public String streamToString(InputStream is) throws IOException {
@@ -150,6 +163,10 @@ public class NetworkCallExecutorTask extends AsyncTask<Void, Void, Void> {
 
 		Log.v(TAG, "response name: " + name);
 		Log.v(TAG, "response accessToken: " + accessToken);
+
+		if (mlistener != null) {
+			mlistener.onRequestComplete();
+		}
 	}
 
 }

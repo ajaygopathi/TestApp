@@ -42,7 +42,7 @@ public class ActivityHome extends BaseHttpActivity implements
 			Bundle requestData = new Bundle();
 			requestData.putString("token", token);
 
-			onExecute(requestData);
+			onExecute(requestData, ActivityHome.this);
 		}
 
 		@Override
@@ -55,11 +55,12 @@ public class ActivityHome extends BaseHttpActivity implements
 
 	@Override
 	public void onRequestComplete() {
-
+		Log.v(TAG, "onRequestComplete");
 	}
 
 	@Override
 	public void onError() {
+		Log.v(TAG, "onError: ");
 	}
 
 }
