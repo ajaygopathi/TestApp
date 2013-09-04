@@ -12,12 +12,7 @@ public interface HttpCallbackListener {
 	 */
 	public abstract void onRequestComplete();
 
-	/**
-	 * Called when the web service request is cancelled.
-	 * 
-	 */
-	public abstract void onCancel();
-
+	
 	/**
 	 * Called when the error is incurred while executing the web service
 	 * request.

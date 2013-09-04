@@ -30,8 +30,6 @@ public class ActivityHome extends BaseHttpActivity implements
 
 	}
 
-	
-
 	private static final String TAG = ActivityHome.class.getSimpleName();
 
 	public class ClientAuthDialogListener implements AuthDialogListener {
@@ -39,11 +37,18 @@ public class ActivityHome extends BaseHttpActivity implements
 		@Override
 		public void onComplete(String token) {
 			Log.v(TAG, "ajay accesstoken : " + token);
+			mAuthentication.dismissLoginDialog();
+
+			Bundle requestData = new Bundle();
+			requestData.putString("token", token);
+
+			onExecute(requestData);
 		}
 
 		@Override
 		public void onError(String error) {
 			Log.v(TAG, "error: " + error);
+			mAuthentication.dismissLoginDialog();
 		}
 
 	}
@@ -54,16 +59,7 @@ public class ActivityHome extends BaseHttpActivity implements
 	}
 
 	@Override
-	public void onCancel() {
-
-	}
-
-	@Override
 	public void onError() {
-	}
-
-	private void makerequest(String token){
-		
 	}
 
 }

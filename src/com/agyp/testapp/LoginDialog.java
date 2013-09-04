@@ -1,7 +1,5 @@
 package com.agyp.testapp;
 
-import com.agyp.utils.TestAppConstants;
-
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -22,6 +20,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.agyp.utils.TestAppConstants;
+
 public class LoginDialog extends Dialog {
 
 	private static final FrameLayout.LayoutParams FILL_LAYOUT_PARAMS = new FrameLayout.LayoutParams(
@@ -30,11 +30,12 @@ public class LoginDialog extends Dialog {
 	static final int margin = 4;
 	static final int padding = 2;
 
-//	static final float[] LANDSCAPE = { 460, 260 };
-//	static final float[] PORTRAIT = { 380, 460 };
-	
+	// static final float[] LANDSCAPE = { 460, 260 };
+	// static final float[] PORTRAIT = { 380, 460 };
+
 	static final float[] LANDSCAPE = { 460, 260 };
 	static final float[] PORTRAIT = { 300, 400 };
+	public static final String TAG = LoginDialog.class.getSimpleName();
 
 	private ProgressDialog mProgressDialog;
 	private LinearLayout linearLayout;
@@ -138,8 +139,8 @@ public class LoginDialog extends Dialog {
 			if (title != null && title.length() > 0) {
 				textView.setText(title);
 			}
-			Log.d("Insta Login Dialog", "On Page Finished URL: " + url);
-			Log.e("PAGE FINISHED", "Called");
+			Log.d(TAG, "On Page Finished URL: " + url);
+			Log.e(TAG, "Called");
 			LoginDialog.this.dismiss();
 		}
 
@@ -169,4 +170,12 @@ public class LoginDialog extends Dialog {
 		public void onError(String error);
 	}
 
+	@Override
+	public void dismiss() {
+		Log.v(TAG, "dialog dismissed........................");
+		if (webView != null) {
+			webView.stopLoading();
+		}
+		super.dismiss();
+	}
 }
