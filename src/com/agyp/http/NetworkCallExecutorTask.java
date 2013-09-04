@@ -1,14 +1,14 @@
 package com.agyp.http;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.http.HttpEntity;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -19,95 +19,66 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.agyp.utils.TestAppConstants;
+import com.agyp.utils.Utils;
 
-public class NetworkCallExecutorTask extends AsyncTask<Void, Void, Void> {
+public class NetworkCallExecutorTask extends AsyncTask<Void, Void, Bundle> {
 
 	private static final String TAG = NetworkCallExecutorTask.class
 			.getSimpleName();
 	private String mAccessTokenString;
 	private String mToken;
 	private ProgressDialog mProgressDialog;
-	private String mTokenUrl;
 	private HttpCallbackListener mlistener;
+	private HttpEntity mHttpEntity;
+	private Bundle mRequestBundle;
 
 	public NetworkCallExecutorTask(Bundle requestBundle, Context context,
 			HttpCallbackListener listener) {
 		mlistener = listener;
+		mRequestBundle = requestBundle;
+
 		mToken = requestBundle.getString("token");
-		mTokenUrl = HttpRequestConstants.TOKENURL + "?client_id="
-				+ TestAppConstants.CLIENT_ID + "&client_secret="
-				+ TestAppConstants.CLIENT_SECRET + "&redirect_uri="
-				+ TestAppConstants.CALLBACKURL
-				+ "&grant_type=authorization_code";
+
 		mProgressDialog = new ProgressDialog(context);
 		mProgressDialog.setTitle("Please Wait");
 		mProgressDialog.setCancelable(false);
 	}
 
 	@Override
-	protected Void doInBackground(Void... params) {
+	protected Bundle doInBackground(Void... params) {
 		try {
-			
-			//prepare request object
-			//hit server
-			//parse
-			//callback
-
-			URL url = new URL(mTokenUrl);
-			HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url
-					.openConnection();
-			httpsURLConnection.setRequestMethod("POST");
-			httpsURLConnection.setDoInput(true);
-			httpsURLConnection.setDoOutput(true);
-
-			OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
-					httpsURLConnection.getOutputStream());
-			outputStreamWriter.write("client_id=" + TestAppConstants.CLIENT_ID
-					+ "&client_secret=" + TestAppConstants.CLIENT_SECRET
-					+ "&grant_type=authorization_code" + "&redirect_uri="
-					+ TestAppConstants.CALLBACKURL + "&code=" + mToken);
-
-			outputStreamWriter.flush();
-
-			// mTokenUrl = HttpRequestConstants.TOKENURL + "?client_id="
-			// + TestAppConstants.CLIENT_ID + "&client_secret="
-			// + TestAppConstants.CLIENT_SECRET + "&redirect_uri="
-			// + TestAppConstants.CALLBACKURL
-			// + "&grant_type=authorization_code" + "&code=" + mToken;
 
 			// Response would be a JSON response sent by instagram
-			String response = streamToString(httpsURLConnection
+			HttpURLConnection httpsURLConnection = getUserDetails(mToken);
+			String response = Utils.streamToString(httpsURLConnection
 					.getInputStream());
 			JSONObject jsonObject = (JSONObject) new JSONTokener(response)
 					.nextValue();
+			Log.v(TAG, "response: ---- " + response);
 
-			mAccessTokenString = jsonObject.getString("access_token");
+		} catch (SocketTimeoutException timeout) {
+			timeout.printStackTrace();
 
-			// User details like, name, id, tagline, profile pic etc.
-			JSONObject userJsonObject = jsonObject.getJSONObject("user");
-
-			String id = userJsonObject.getString("id");
-
-			String username = userJsonObject.getString("username");
-
-			String name = userJsonObject.getString("full_name");
-			// mSessionStore.saveInstagramSession(mAccessTokenString, id,
-			// username, name);
-			showResponseDialog(name, mAccessTokenString);
 		} catch (Exception e) {
-			// mAuthAuthenticationListener
-			// .onFail("Failed to get access token");
 			e.printStackTrace();
+
+		} finally {
+			if (mHttpEntity != null) {
+				try {
+					mHttpEntity.consumeContent();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return null;
 	}
 
 	@Override
-	protected void onPostExecute(Void result) {
+	protected void onPostExecute(Bundle result) {
 		dismissDialog();
 		// mAuthAuthenticationListener.onSuccess();
 		super.onPostExecute(result);
-
 	}
 
 	@Override
@@ -118,32 +89,6 @@ public class NetworkCallExecutorTask extends AsyncTask<Void, Void, Void> {
 
 	public void unregisterCallbackListener() {
 		mlistener = null;
-	}
-
-	public String streamToString(InputStream is) throws IOException {
-		String string = "";
-
-		if (is != null) {
-			StringBuilder stringBuilder = new StringBuilder();
-			String line;
-
-			try {
-				BufferedReader reader = new BufferedReader(
-						new InputStreamReader(is));
-
-				while ((line = reader.readLine()) != null) {
-					stringBuilder.append(line);
-				}
-
-				reader.close();
-			} finally {
-				is.close();
-			}
-
-			string = stringBuilder.toString();
-		}
-
-		return string;
 	}
 
 	public void showDialog(String message) {
@@ -167,6 +112,46 @@ public class NetworkCallExecutorTask extends AsyncTask<Void, Void, Void> {
 		if (mlistener != null) {
 			mlistener.onRequestComplete();
 		}
+	}
+
+	private HttpURLConnection getUserDetails(String token) throws IOException {
+
+		String mTokenUrl = HttpRequestConstants.TOKENURL + "?client_id="
+				+ TestAppConstants.CLIENT_ID + "&client_secret="
+				+ TestAppConstants.CLIENT_SECRET + "&redirect_uri="
+				+ TestAppConstants.CALLBACKURL
+				+ "&grant_type=authorization_code";
+
+		Log.v(TAG, "token url: ---- " + mTokenUrl);
+
+		URL url = new URL(mTokenUrl);
+		HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url
+				.openConnection();
+		httpsURLConnection.setRequestMethod("POST");
+		httpsURLConnection.setDoInput(true);
+		httpsURLConnection.setDoOutput(true);
+
+		OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
+				httpsURLConnection.getOutputStream());
+		outputStreamWriter.write("client_id=" + TestAppConstants.CLIENT_ID
+				+ "&client_secret=" + TestAppConstants.CLIENT_SECRET
+				+ "&grant_type=authorization_code" + "&redirect_uri="
+				+ TestAppConstants.CALLBACKURL + "&code=" + mToken);
+
+		outputStreamWriter.flush();
+		return httpsURLConnection;
+
+		// mAccessTokenString = jsonObject.getString("access_token");
+		//
+		// // User details like, name, id, tagline, profile pic etc.
+		// JSONObject userJsonObject = jsonObject.getJSONObject("user");
+		// String id = userJsonObject.getString("id");
+		// String username = userJsonObject.getString("username");
+		// String name = userJsonObject.getString("full_name");
+		// // mSessionStore.saveInstagramSession(mAccessTokenString, id,
+		// // username, name);
+		// Log.v(TAG, "" + id + " " + username + " " + name);
+		// showResponseDialog(name, mAccessTokenString);
 	}
 
 }
